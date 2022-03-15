@@ -6,11 +6,9 @@ import { Room } from "./room";
 
 export const socketListener = async (server: http.Server, room: Room) => {
   const io = new socket.Server(server);
-  let onlineUsers = 0;
 
   io.on("connection", async (socket) => {
-    ++onlineUsers;
-    console.log(`Online Users: ${onlineUsers}`);
+    console.log(`Online Users: ${room.getOnlineUsers()}`);
 
     // the rooms of the user is created asynchronous
     const user = await new RandomUser().join(room);
@@ -45,8 +43,7 @@ export const socketListener = async (server: http.Server, room: Room) => {
     });
 
     socket.on("disconnect", () => {
-      onlineUsers--;
-      console.log(`Online Users: ${onlineUsers}`);
+      console.log(`Online Users: ${room.getOnlineUsers()}`);
 
       // remove user from display users in list and emit new list of user
       socket.leave(user.roomID);
