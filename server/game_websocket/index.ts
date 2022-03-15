@@ -12,7 +12,8 @@ export const socketListener = async (server: http.Server, room: Room) => {
 
     // the rooms of the user is created asynchronous
     const user = await new RandomUser().join(room);
-    // const user = { name: "boy" };
+    console.log(user);
+
     const board = user.board;
 
     // moves cooldown
@@ -25,8 +26,6 @@ export const socketListener = async (server: http.Server, room: Room) => {
 
     // emit the state of boards to user just connecting
     socket.to(user.roomID).emit("board", board.getBoard);
-
-    room.addUserToRoom(user);
 
     // emit the lists of users in the room to just connected users
     io.to(user.roomID).emit("users", room.getUsersInRoom(user));
@@ -42,13 +41,13 @@ export const socketListener = async (server: http.Server, room: Room) => {
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log(`Online Users: ${room.getOnlineUsers()}`);
 
       // remove user from display users in list and emit new list of user
       socket.leave(user.roomID);
 
-      room.removeUserFromRoom(user);
+      room.leaveRoom(user);
 
       // io.emit("users", users);
       io.to(user.roomID).emit("users", room.getUsersInRoom(user));
@@ -58,9 +57,6 @@ export const socketListener = async (server: http.Server, room: Room) => {
 
       // io.emit("board", board.board);
       io.to(user.roomID).emit("board", board.getBoard);
-
-      // leave room
-      room.leaveRoom(user);
     });
   });
 };

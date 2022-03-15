@@ -16,7 +16,7 @@ class RandomUser {
   }
 
   public async join(room: Room) {
-    const data = await room.joinRoom();
+    const data = await room.joinRoom(this);
     this.roomID = data.id;
     this.board = data.board;
     return this;
