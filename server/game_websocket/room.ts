@@ -94,6 +94,6 @@ export class Room {
 
   // TODO - fix this later
   public getOnlineRooms() {
-    return 44;
+    return this.roomsDetails.length;
   }
 }

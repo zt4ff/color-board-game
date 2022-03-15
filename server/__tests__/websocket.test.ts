@@ -28,6 +28,10 @@ describe("User", () => {
     room.removeUserFromRoom(user);
     expect(room.getUsersInRoom(user).length).toBe(0);
   });
+
+  it("confirms that the number of rooms created is one", () => {
+    expect(room.getOnlineRooms()).toBe(1);
+  });
 });
 
 // TODO - test in sync of multple user
@@ -41,6 +45,7 @@ describe("User", () => {
     // creates four users
     for (let i = 0; i <= 3; i++) {
       users[i] = await new RandomUser().join(room);
+      console.log(users[i]);
     }
   });
 
@@ -48,8 +53,11 @@ describe("User", () => {
     expect(room.getOnlineUsers()).toBe(4);
   });
 
-  it("", async () => {
-    console.log(room.getUsersInRoom(users[0]));
-    // expect(room.getUsersInRoom(users[0]).length).toBe(3);
+  it("add all users to list of players in a room", async () => {
+    for (let i = 0; i < users.length; i++) {
+      room.addUserToRoom(users[i]);
+    }
+    expect(room.getUsersInRoom(users[0]).length).toBe(3);
+    expect(room.getUsersInRoom(users[3]).length).toBe(1);
   });
 });
