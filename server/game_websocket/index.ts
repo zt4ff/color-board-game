@@ -8,11 +8,10 @@ export const socketListener = async (server: http.Server, room: Room) => {
   const io = new socket.Server(server);
 
   io.on("connection", async (socket) => {
-    console.log(`Online Users: ${room.getOnlineUsers()}`);
-
     // the rooms of the user is created asynchronous
     const user = await new RandomUser().join(room);
-    console.log(user);
+
+    console.log(`Online Users: ${room.getOnlineUsers()}`);
 
     const board = user.board;
 
@@ -42,8 +41,6 @@ export const socketListener = async (server: http.Server, room: Room) => {
     });
 
     socket.on("disconnect", async () => {
-      console.log(`Online Users: ${room.getOnlineUsers()}`);
-
       // remove user from display users in list and emit new list of user
       socket.leave(user.roomID);
 
@@ -57,6 +54,8 @@ export const socketListener = async (server: http.Server, room: Room) => {
 
       // io.emit("board", board.board);
       io.to(user.roomID).emit("board", board.getBoard);
+
+      console.log(`Online Users: ${room.getOnlineUsers()}`);
     });
   });
 };
