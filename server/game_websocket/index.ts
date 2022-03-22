@@ -4,14 +4,16 @@ import { RandomUser } from "./user";
 import { CoolDown } from "./cooldown";
 import { Room } from "./room";
 
+let io: socket.Server;
+
 export const socketListener = async (server: http.Server, room: Room) => {
-  const io = new socket.Server(server);
+  io = new socket.Server(server);
 
   io.on("connection", async (socket) => {
     // the rooms of the user is created asynchronous
     const user = await new RandomUser().join(room);
 
-    console.log(`Online Users: ${room.getOnlineUsers()}`);
+    // console.log(`Online Users: ${room.getOnlineUsers()}`);
 
     const board = user.board;
 
@@ -24,7 +26,7 @@ export const socketListener = async (server: http.Server, room: Room) => {
     socket.join(user.roomID);
 
     // emit the state of boards to user just connecting
-    socket.to(user.roomID).emit("board", board.getBoard);
+    socket.emit("board", board.getBoard);
 
     // emit the lists of users in the room to just connected users
     io.to(user.roomID).emit("users", room.getUsersInRoom(user));
@@ -33,7 +35,7 @@ export const socketListener = async (server: http.Server, room: Room) => {
       if (cooldown.check()) {
         const playerWon = board.makeTurn(x, y, user.color);
         io.to(user.roomID).emit("turn", { x, y, color: user.color });
-        console.log(`user: ${user.username} won: ${playerWon}`);
+        // console.log(`user: ${user.username} won: ${playerWon}`);
         if (playerWon) {
           console.log("somebody won");
         }
@@ -55,7 +57,11 @@ export const socketListener = async (server: http.Server, room: Room) => {
       // io.emit("board", board.board);
       io.to(user.roomID).emit("board", board.getBoard);
 
-      console.log(`Online Users: ${room.getOnlineUsers()}`);
+      // console.log(`Online Users: ${room.getOnlineUsers()}`);
     });
   });
+};
+
+socketListener.close = async () => {
+  await io.close();
 };

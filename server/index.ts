@@ -11,15 +11,8 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, "../client")));
 
 const server = http.createServer(app);
-const room = new Room();
 
-app.get("/game", (req, res) => {
-  try {
-    socketListener(server, room);
-  } catch (err) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+const room = new Room();
 
 socketListener(server, room);
 
