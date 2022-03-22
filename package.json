@@ -12,7 +12,7 @@
     "client:build": "cd client && webpack",
     "dev": "nodemon",
     "client:e2e": "playwright test",
-    "server:test": "jest --watchAll --config=./server/jest.config.ts ./server",
+    "server:test": "jest --watchAll --config=./server/jest.config.ts ./server --detectOpenHandles",
     "serve": "lt --port 3000"
   },
   "devDependencies": {
