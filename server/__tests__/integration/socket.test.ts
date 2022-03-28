@@ -5,37 +5,47 @@ import { Room } from "../../game_websocket/room";
 
 let httpServer: http.Server;
 let clientSocket: ClientSocket;
-
+let room: Room;
 const PORT = process.env.DEVELOPMENT_SERVER_PORT || 4400;
 
 describe("Socket test", () => {
-  beforeAll(async () => {
-    const room = new Room();
+  beforeAll(() => {
+    room = new Room();
     httpServer = http.createServer();
 
-    await socketListener(httpServer, room);
+    socketListener(httpServer, room);
 
-    await httpServer.listen(4400);
-    clientSocket = await clientIO(`http://localhost:${PORT}`);
+    httpServer.listen(4400);
+    clientSocket = clientIO(`http://localhost:${PORT}`);
   });
 
-  afterAll((done) => {
-    httpServer.close(async (err) => {
+  afterAll(() => {
+    httpServer.close((err) => {
       if (err) {
-        process.exit(1);
+        process.exit(0);
       }
-
-      await socketListener.close();
-      done();
+      socketListener.close();
     });
   });
 
   test("client is connected to server", (done) => {
+    const hexRegex = /^#(([0-9a-fA-F]{2}){3}|([0-9a-fA-F]){3})$/;
+
     clientSocket.on("connect", () => {
+      // board is emmited from the server
       clientSocket.on("board", (board) => {
         expect(board.length).toBe(20);
+      });
+
+      // assert that the list of users is sent on connection
+      clientSocket.on("users", (users) => {
+        expect(users[0].color).toMatch(hexRegex);
+        expect(users.length).toBe(1);
+
+        expect(room.getOnlineRooms()).toBe(1);
+        expect(room.getOnlineUsers()).toBe(1);
         done();
       });
     });
-  });
+  }, 20000);
 });

@@ -48,16 +48,12 @@ export const socketListener = async (server: http.Server, room: Room) => {
 
       room.leaveRoom(user);
 
-      // io.emit("users", users);
       io.to(user.roomID).emit("users", room.getUsersInRoom(user));
 
       // remove user moves on board emit board
       board.removeDisconnectedUserFromBoard(user.color);
 
-      // io.emit("board", board.board);
       io.to(user.roomID).emit("board", board.getBoard);
-
-      // console.log(`Online Users: ${room.getOnlineUsers()}`);
     });
   });
 };
