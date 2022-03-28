@@ -4,15 +4,17 @@ import { RandomUser } from "./user";
 import { CoolDown } from "./cooldown";
 import { Room } from "./room";
 
+let io: socket.Server;
+
 export const socketListener = async (server: http.Server, room: Room) => {
-  const io = new socket.Server(server);
+  io = new socket.Server(server);
 
   io.on("connection", async (socket) => {
-    console.log(`Online Users: ${room.getOnlineUsers()}`);
-
     // the rooms of the user is created asynchronous
     const user = await new RandomUser().join(room);
-    // const user = { name: "boy" };
+
+    // console.log(`Online Users: ${room.getOnlineUsers()}`);
+
     const board = user.board;
 
     // moves cooldown
@@ -24,9 +26,7 @@ export const socketListener = async (server: http.Server, room: Room) => {
     socket.join(user.roomID);
 
     // emit the state of boards to user just connecting
-    socket.to(user.roomID).emit("board", board.getBoard);
-
-    room.addUserToRoom(user);
+    socket.emit("board", board.getBoard);
 
     // emit the lists of users in the room to just connected users
     io.to(user.roomID).emit("users", room.getUsersInRoom(user));
@@ -35,32 +35,29 @@ export const socketListener = async (server: http.Server, room: Room) => {
       if (cooldown.check()) {
         const playerWon = board.makeTurn(x, y, user.color);
         io.to(user.roomID).emit("turn", { x, y, color: user.color });
-        console.log(`user: ${user.username} won: ${playerWon}`);
+        // console.log(`user: ${user.username} won: ${playerWon}`);
         if (playerWon) {
           console.log("somebody won");
         }
       }
     });
 
-    socket.on("disconnect", () => {
-      console.log(`Online Users: ${room.getOnlineUsers()}`);
-
+    socket.on("disconnect", async () => {
       // remove user from display users in list and emit new list of user
       socket.leave(user.roomID);
 
-      room.removeUserFromRoom(user);
+      room.leaveRoom(user);
 
-      // io.emit("users", users);
       io.to(user.roomID).emit("users", room.getUsersInRoom(user));
 
       // remove user moves on board emit board
       board.removeDisconnectedUserFromBoard(user.color);
 
-      // io.emit("board", board.board);
       io.to(user.roomID).emit("board", board.getBoard);
-
-      // leave room
-      room.leaveRoom(user);
     });
   });
+};
+
+socketListener.close = async () => {
+  await io.close();
 };

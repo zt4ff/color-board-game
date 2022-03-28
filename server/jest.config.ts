@@ -7,5 +7,11 @@ const config: Config.InitialOptions = {
   },
   collectCoverage: true,
   coverageReporters: ["text-summary", "html"],
+  collectCoverageFrom: [
+    "**.ts",
+    "!**/*.config.{js,ts}",
+    "!index.ts",
+    "!**/@types/**",
+  ],
 };
 export default config;

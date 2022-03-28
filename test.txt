@@ -1,0 +1,12 @@
+docker run -d \
+  --name=codeserver \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Europe/London \
+  -e PASSWORD=kayode-loves-you \
+  -e SUDO_PASSWORD=kayode-loves-you1414 \
+  -e PROXY_DOMAIN=code-server.my.domain \
+  -p 8443:8443 \
+  -v /path/to/appdata/config:/config \
+  --restart unless-stopped \
+  lscr.io/linuxserver/code-server
